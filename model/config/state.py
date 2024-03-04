@@ -6,6 +6,9 @@ from model.mechanisms import link_service_mechanism
 from itertools import product
 import random
 
+# This is the number of total apps to be used in gaming tests (honest+malicious)
+GAMING_APPS_TOTAL = 10
+
 config_option_map = {
     "Test": {
         "Geozones": "Test",
@@ -24,6 +27,17 @@ config_option_map = {
         "Services": "Base",
         "Servicers": "Base",
         "Validators": "Base",
+    },
+
+    # Used for: ImplicitQoS
+    "Game50-50": {
+        "Geozones": "Test",
+        "Applications": "Game50-50",
+        "DAO": "Test",
+        "Gateways": "Test",
+        "Services": "Test",
+        "Servicers": "Test",
+        "Validators": "Test",
     },
 }
 
@@ -151,6 +165,41 @@ application_config = {
         ),
     ],
 }
+
+application_config['Game50-50'] = list()
+# Add honest apps
+for i in range(GAMING_APPS_TOTAL//2):
+    application_config['Game50-50'].append(Application(
+            name="H%d"%i,
+            pokt_holdings=15000 * 1e6,
+            staked_pokt=15000 * 1e6,
+            services=[],
+            geo_zone="Zone 1",
+            number_of_services=1,
+            stake_status="Staked",
+            unstaking_height=None,
+            delegate=None,
+            uses_gateway=True,
+            tag="honest"
+        ),)
+# Add malicious apps
+for i in range(GAMING_APPS_TOTAL//2):
+    application_config['Game50-50'].append(Application(
+            name="M%d"%i,
+            pokt_holdings=15000 * 1e6,
+            staked_pokt=15000 * 1e6,
+            services=[],
+            geo_zone="Zone 1",
+            number_of_services=1,
+            stake_status="Staked",
+            unstaking_height=None,
+            delegate=None,
+            uses_gateway=True,
+            tag="malicious"
+        ),)
+    
+
+
 
 dao_config = {"Test": DAO(pokt_holdings=0), "Base": DAO(pokt_holdings=0)}
 

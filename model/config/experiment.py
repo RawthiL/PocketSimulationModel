@@ -355,7 +355,7 @@ for i in range(1, 3073):
     
 ################################################################################
 experimental_setups["implicit_qos_test"] = {
-    "config_option_state": "Test",
+    "config_option_state": "Game50-50",
     "config_option_params": "ImplicitQoS",
     "monte_carlo_n": 1,
     "T": 365,

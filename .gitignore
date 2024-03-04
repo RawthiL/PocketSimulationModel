@@ -131,3 +131,7 @@ dmypy.json
 data/*.pkl
 aws-credentials.csv
 simulation_data/*
+
+
+# Misc
+untracked

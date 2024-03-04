@@ -46,10 +46,10 @@ def servicer_join_ac(state, params):
         return
 
 
-def relay_requests_ac(state, params, relay_log, servicer_relay_log):
+def relay_requests_ac(state, params, relay_log, servicer_relay_log, idx):
     out = {}
     # Submit request
-    spaces = submit_relay_requests_ba(state, params)
+    spaces = submit_relay_requests_ba(state, params, idx)
     spaces = submit_relay_requests_policy(state, params, spaces)
     out["total_relays"] = spaces[0]["session"]["number_of_relays"]
 

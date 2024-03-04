@@ -116,11 +116,14 @@ def gateway_undelegation_ba_basic(
 def submit_relay_requests_ba(
     state: StateType,
     params: ParamType,
+    idx: int,
 ) -> Tuple[submit_relay_request_space]:
     if params["submit_relay_requests_function"] == "test":
         return submit_relay_requests_ba_test(state, params)
     if params["submit_relay_requests_function"] == "basic_gamma":
         return submit_relay_requests_ba_gamma(state, params)
+    if params["submit_relay_requests_function"] == "app_looper_test":
+        return submit_relay_requests_ba_test_app_looper(state, params, idx)
     else:
         assert False, "Invalid submit_relay_requests_function"
 
@@ -133,6 +136,22 @@ def submit_relay_requests_ba_test(
     number_of_relays = 10
 
     return ({"application_address": application, "number_of_relays": number_of_relays},)
+
+def submit_relay_requests_ba_test_app_looper(
+    state: StateType,
+    params: ParamType,
+    idx: int
+) -> Tuple[submit_relay_request_space]:
+    # Get app
+    application = state["Applications"][idx]
+    # Check if app will do relays
+    if np.random.rand() <= application.session_use_prob:
+        number_of_relays = 10
+    else:
+        number_of_relays = 0
+
+    return ({"application_address": application, "number_of_relays": number_of_relays},)
+
 
 
 def submit_relay_requests_ba_gamma(

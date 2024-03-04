@@ -15,7 +15,7 @@ config_option_map = {
     "BaseDynamic": {"System": "BaseDynamic", "Behaviors": "Base", "Functional": "Base"},
     "BaseEvent": {"System": "Base", "Behaviors": "BaseEvent", "Functional": "Base"},
 
-    "ImplicitQoS": {"System": "ImplicitQoS", "Behaviors": "Test", "Functional": "Test"},
+    "ImplicitQoS": {"System": "ImplicitQoS", "Behaviors": "ImplicitQoS", "Functional": "ImplicitQoS"},
 }
 
 
@@ -155,7 +155,7 @@ system_param_config["BaseDynamic"]["gateway_fee_per_relay"] = ["Dynamic"]
 
 system_param_config["ImplicitQoS"] = deepcopy(system_param_config["Test"])
 system_param_config["ImplicitQoS"]["granularity"] = ["session"]
-
+system_param_config["ImplicitQoS"]["maximum_servicers_per_session"] = [24]
 
 
 behavior_param_config: Dict[str, BehaviorParamsType] = {
@@ -220,6 +220,28 @@ behavior_param_config: Dict[str, BehaviorParamsType] = {
 behavior_param_config["BaseEvent"] = deepcopy(behavior_param_config["Base"])
 behavior_param_config["BaseEvent"]["event"] = ["servicer_shutdown_by_geozone_random"]
 
+behavior_param_config["ImplicitQoS"] = deepcopy(behavior_param_config["Test"])
+behavior_param_config["ImplicitQoS"]["average_session_per_application"] = [1]
+
+# Theese must be set to the maximum you wish to see, otherwise their numbers will grow over timestep (randomly)
+behavior_param_config["ImplicitQoS"]["application_max_number"] =  [10]
+behavior_param_config["ImplicitQoS"]["servicer_max_number"] =  [100]
+behavior_param_config["ImplicitQoS"]["service_max_number"] =  [1]
+
+behavior_param_config["ImplicitQoS"]["application_leave_probability"] =  [0.0]
+behavior_param_config["ImplicitQoS"]["gateway_leave_probability"] =  [0.0]
+behavior_param_config["ImplicitQoS"]["service_leave_probability"] =  [0.0]
+behavior_param_config["ImplicitQoS"]["servicer_leave_probability"] =  [0.0]
+behavior_param_config["ImplicitQoS"]["service_unlinking_probability"] =  [0.0]
+behavior_param_config["ImplicitQoS"]["gateway_undelegation_probability"] =  [0.0]
+behavior_param_config["ImplicitQoS"]["servicer_jailing_probability"] =  [0.0]
+behavior_param_config["ImplicitQoS"]["uses_gateway_probability"] =  [0.0]
+behavior_param_config["ImplicitQoS"]["service_linking_probability_normal"] =  [0.0]
+behavior_param_config["ImplicitQoS"]["service_linking_probability_just_joined"] =  [0.0]
+behavior_param_config["ImplicitQoS"]["kick_bottom_probability"] =  [0.0]
+        
+
+
 functional_param_config: Dict[str, FunctionalParamsType] = {
     "Test": {
         "application_join_function": ["simple_unfiform"],
@@ -264,6 +286,11 @@ functional_param_config: Dict[str, FunctionalParamsType] = {
         "gateway_stake_function": ["basic"],
     },
 }
+
+functional_param_config["ImplicitQoS"] = deepcopy(functional_param_config["Test"])
+functional_param_config["ImplicitQoS"]["submit_relay_requests_function"] = ["app_looper_test"]
+
+
 config_option_map_sweep = {}
 
 test_sweep = build_params("Base")

@@ -20,13 +20,13 @@ def p_servicers_join(_params, substep, state_history, state) -> dict:
 def p_relay_requests(_params, substep, state_history, state) -> dict:
     number_relays = _params["average_session_per_application"] * len(
         state["Applications"]
-    )
+    ) # for session granularity we use average_session_per_application=1 to loop over all apps
     total_relays = 0
     processed_relays = 0
     relay_log = {}
     servicer_relay_log = {}
-    for _ in range(number_relays):
-        out = relay_requests_ac(state, _params, relay_log, servicer_relay_log)
+    for i in range(number_relays):
+        out = relay_requests_ac(state, _params, relay_log, servicer_relay_log, i)
         total_relays += out["total_relays"]
         processed_relays += out["processed_relays"]
     assert sum(relay_log.values()) == processed_relays
