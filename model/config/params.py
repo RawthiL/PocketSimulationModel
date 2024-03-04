@@ -14,6 +14,8 @@ config_option_map = {
     "Base": {"System": "Base", "Behaviors": "Base", "Functional": "Base"},
     "BaseDynamic": {"System": "BaseDynamic", "Behaviors": "Base", "Functional": "Base"},
     "BaseEvent": {"System": "Base", "Behaviors": "BaseEvent", "Functional": "Base"},
+
+    "ImplicitQoS": {"System": "ImplicitQoS", "Behaviors": "Test", "Functional": "Test"},
 }
 
 
@@ -63,6 +65,7 @@ def create_sweep(prefix, sweep, config_option_map_sweep):
 
 system_param_config: Dict[str, SystemParamsType] = {
     "Test": {
+        "granularity" : ["day"],
         "minimum_stake_servicer": [15000 * 1e6],
         "minimum_stake_period_servicer": [10],
         "minimum_pause_time": [10],
@@ -108,6 +111,7 @@ system_param_config: Dict[str, SystemParamsType] = {
         "kpi_3_R": [1.632 * 10**-5],
     },
     "Base": {
+        "granularity" : ["day"],
         "minimum_stake_servicer": [15000 * 1e6],
         "minimum_stake_period_servicer": [10],
         "minimum_pause_time": [10],
@@ -147,6 +151,12 @@ system_param_config: Dict[str, SystemParamsType] = {
 system_param_config["BaseDynamic"] = deepcopy(system_param_config["Base"])
 system_param_config["BaseDynamic"]["relays_to_tokens_multiplier"] = ["Dynamic"]
 system_param_config["BaseDynamic"]["gateway_fee_per_relay"] = ["Dynamic"]
+
+
+system_param_config["ImplicitQoS"] = deepcopy(system_param_config["Test"])
+system_param_config["ImplicitQoS"]["granularity"] = ["session"]
+
+
 
 behavior_param_config: Dict[str, BehaviorParamsType] = {
     "Test": {
@@ -263,6 +273,17 @@ test_sweep["servicer_max_number"] = [20, 30, 40]
 test_sweep["relays_per_session_gamma_distribution_scale"] = [200000, 300000, 400000]
 
 create_sweep("Test", test_sweep, config_option_map_sweep)
+
+
+implicit_qos_sweep = build_params("Base")
+CORE_PARAM_KEYS = sorted(list(implicit_qos_sweep.keys()))
+implicit_qos_sweep["application_max_number"] = [20, 30, 40]
+implicit_qos_sweep["servicer_max_number"] = [20, 30, 40]
+implicit_qos_sweep["relays_per_session_gamma_distribution_scale"] = [200000, 300000, 400000]
+
+create_sweep("ImplicitQoS", implicit_qos_sweep, config_option_map_sweep)
+
+
 
 gateway_viability_sweep_ag1_ = build_params("Base")
 gateway_viability_sweep_ag1_["session_token_bucket_coefficient"] = [25, 400]

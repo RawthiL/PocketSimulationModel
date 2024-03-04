@@ -349,3 +349,14 @@ for i in range(1, 3073):
         "monte_carlo_n": 5,
         "T": 365,
     }
+
+
+################################################################################
+    
+################################################################################
+experimental_setups["implicit_qos_test"] = {
+    "config_option_state": "Test",
+    "config_option_params": "ImplicitQoS",
+    "monte_carlo_n": 1,
+    "T": 365,
+}

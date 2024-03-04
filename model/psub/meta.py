@@ -5,10 +5,18 @@ from datetime import datetime
 def p_update_time(_params, substep, state_history, state) -> dict:
     if state["timestep"] == 1:
         print(datetime.now())
-    return {
-        "height": state["height"] + 60 * 60 * 24,
-        "day": state["day"] + 1,
-    }
+    if _params['granularity'] == 'day':
+        return {
+            "height": state["height"] + int(24*60/15),
+            "day": state["day"] + 1,
+        }
+    elif _params['granularity'] == 'session':
+        return {
+            "height": state["height"] + 4,
+            "day": int(state["height"]//(24*60/15)),
+        }
+    else:
+        raise ValueError("Time step granularity \"%s\" not supported"% state['granularity'])
 
 
 def s_update_height(_params, substep, state_history, state, _input) -> tuple:

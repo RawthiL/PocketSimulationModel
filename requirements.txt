@@ -8,3 +8,5 @@ matplotlib==3.8.2
 seaborn==0.13.0
 dill==0.3.6
 scipy
+requests_toolbelt==1.0.0
+tqdm
