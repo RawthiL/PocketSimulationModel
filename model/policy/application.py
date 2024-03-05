@@ -70,6 +70,7 @@ def submit_relay_requests_policy_test(
     state: StateType, params: ParamType, domain: Tuple[submit_relay_request_space]
 ) -> Tuple[new_session_space, new_session_space]:
     num_servicers = domain[0]["application_address"].number_of_services
+    
     servicers = random.sample(
         [x for x in state["Servicers"] if not x.pause_height], num_servicers
     )
@@ -108,7 +109,11 @@ def submit_relay_requests_policy_v1(
     the required number of AppSessionTokens per request. The selection of servicers is random but assigns higher
     probability for higher QoS servicers.
     """
-    num_servicers = domain[0]["application_address"].number_of_services
+    # num_servicers = domain[0]["application_address"].number_of_services
+    # num_servicers = domain[0]["application_address"].number_servicers
+    # num_servicers = params['maximum_servicers_per_session']
+    num_servicers = domain[0]["application_address"].number_servicers
+
     servicers = random.sample(state["Servicers"], num_servicers)
     service = random.choice(state["Services"])
 

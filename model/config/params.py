@@ -155,7 +155,9 @@ system_param_config["BaseDynamic"]["gateway_fee_per_relay"] = ["Dynamic"]
 
 system_param_config["ImplicitQoS"] = deepcopy(system_param_config["Test"])
 system_param_config["ImplicitQoS"]["granularity"] = ["session"]
+system_param_config["ImplicitQoS"]["minimum_servicers_per_session"] = [24]
 system_param_config["ImplicitQoS"]["maximum_servicers_per_session"] = [24]
+
 
 
 behavior_param_config: Dict[str, BehaviorParamsType] = {
@@ -227,6 +229,12 @@ behavior_param_config["ImplicitQoS"]["average_session_per_application"] = [1]
 behavior_param_config["ImplicitQoS"]["application_max_number"] =  [10]
 behavior_param_config["ImplicitQoS"]["servicer_max_number"] =  [100]
 behavior_param_config["ImplicitQoS"]["service_max_number"] =  [1]
+
+# This tells you how many nodes the app requests
+behavior_param_config["ImplicitQoS"]["applications_use_min_servicers"] =  [24]
+behavior_param_config["ImplicitQoS"]["applications_use_max_servicers"] =  [24]
+
+
 
 behavior_param_config["ImplicitQoS"]["application_leave_probability"] =  [0.0]
 behavior_param_config["ImplicitQoS"]["gateway_leave_probability"] =  [0.0]

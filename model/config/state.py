@@ -8,6 +8,8 @@ import random
 
 # This is the number of total apps to be used in gaming tests (honest+malicious)
 GAMING_APPS_TOTAL = 10
+# Same but for nodes
+GAMING_NODES_TOTAL = 100
 
 config_option_map = {
     "Test": {
@@ -36,7 +38,7 @@ config_option_map = {
         "DAO": "Test",
         "Gateways": "Test",
         "Services": "Test",
-        "Servicers": "Test",
+        "Servicers": "Game50-50",
         "Validators": "Test",
     },
 }
@@ -170,7 +172,7 @@ application_config['Game50-50'] = list()
 # Add honest apps
 for i in range(GAMING_APPS_TOTAL//2):
     application_config['Game50-50'].append(Application(
-            name="H%d"%i,
+            name="honest_%d"%i,
             pokt_holdings=15000 * 1e6,
             staked_pokt=15000 * 1e6,
             services=[],
@@ -180,12 +182,11 @@ for i in range(GAMING_APPS_TOTAL//2):
             unstaking_height=None,
             delegate=None,
             uses_gateway=True,
-            tag="honest"
         ),)
 # Add malicious apps
 for i in range(GAMING_APPS_TOTAL//2):
     application_config['Game50-50'].append(Application(
-            name="M%d"%i,
+            name="malicious_%d"%i,
             pokt_holdings=15000 * 1e6,
             staked_pokt=15000 * 1e6,
             services=[],
@@ -195,7 +196,6 @@ for i in range(GAMING_APPS_TOTAL//2):
             unstaking_height=None,
             delegate=None,
             uses_gateway=True,
-            tag="malicious"
         ),)
     
 
@@ -289,6 +289,48 @@ for i in range(1, 11):
             QoS=0.8,
         )
     )
+
+
+servicers_config['Game50-50'] = list()
+# Add honest nodes
+for i in range(GAMING_NODES_TOTAL//2):
+    servicers_config['Game50-50'].append(
+        Servicer(
+            name="honest_{}".format(i),
+            servicer_salary=0,
+            report_card=None,
+            test_scores=None,
+            pokt_holdings=15000 * 1e6,
+            staked_pokt=15000 * 1e6,
+            service_url=None,
+            services=[],
+            geo_zone="Zone {}".format(i % 5 + 1),
+            operator_public_key=None,
+            pause_height=None,
+            stake_status="Staked",
+            unstaking_height=None,
+            QoS=1.0, # All start as honest
+        ),)
+# Add malicious apps
+for i in range(GAMING_NODES_TOTAL//2):
+    servicers_config['Game50-50'].append(
+        Servicer(
+            name="malicious_{}".format(i),
+            servicer_salary=0,
+            report_card=None,
+            test_scores=None,
+            pokt_holdings=15000 * 1e6,
+            staked_pokt=15000 * 1e6,
+            service_url=None,
+            services=[],
+            geo_zone="Zone {}".format(i % 5 + 1),
+            operator_public_key=None,
+            pause_height=None,
+            stake_status="Staked",
+            unstaking_height=None,
+            QoS=1.0, # All start as honest
+        ),)
+    
 
 validators_config = {
     "Test": [

@@ -90,23 +90,44 @@ def servicer_relay_policy(
             "amount": -relay_charge,
         }
 
+
     # Log which servicers did which work, modulo added to the first
-    split_relays = n_relays // len(session["servicers"])
-    modulo_relays = n_relays % len(session["servicers"])
-    bad_relays = 0
-    for i in range(len(session["servicers"])):
-        amt = split_relays
-        if i == 0:
-            amt += modulo_relays
-        s = session["servicers"][i]
-        if s.shut_down:
-            relay_log[(service, geo_zone)] -= amt
-            bad_relays += amt
-        else:
-            if s in servicer_relay_log:
-                servicer_relay_log[s] += amt
+    def split_relays_round_robin(idxs_servicers):
+        split_relays = n_relays // len(idxs_servicers)
+        modulo_relays = n_relays % len(idxs_servicers)
+        bad_relays = 0
+        assigned_modulo = False
+        for i in idxs_servicers:
+            amt = split_relays
+            if not assigned_modulo:
+                amt += modulo_relays
+                assigned_modulo = True
+            s = session["servicers"][i]
+            if s.shut_down:
+                relay_log[(service, geo_zone)] -= amt
+                bad_relays += amt
             else:
-                servicer_relay_log[s] = amt
+                if s in servicer_relay_log:
+                    servicer_relay_log[s] += amt
+                else:
+                    servicer_relay_log[s] = amt
+        return bad_relays
+
+    # Check if the app is malicious and self deal if so
+    self_deal_nodes = list()
+    if "malicious" in application.name:
+        # Now chek if there are any malicous nodes to deal to
+        for idx in range(len(session["servicers"])):
+            if "malicious" in session["servicers"][idx].name :
+                # print(session["servicers"][idx].name)
+                self_deal_nodes.append(idx)
+    if len(self_deal_nodes)>0:
+        # print(self_deal_nodes)
+        # Assign all relays to own nodes
+        bad_relays = split_relays_round_robin(self_deal_nodes)
+    else:
+        # Round robin all relays
+        bad_relays = split_relays_round_robin([i for i in range(len(session["servicers"]))])
 
     # Burn per relay policy
     space2: servicer_relay_space = domain[0]

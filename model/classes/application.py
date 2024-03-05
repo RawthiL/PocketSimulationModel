@@ -25,8 +25,8 @@ class Application:
         unstaking_height: BlockHeightType,
         delegate: GatewayEntityType,
         uses_gateway: bool,
-        tag: str = 'default',
         session_use_prob: float = 1.0,
+        number_servicers: int = 24,
     ):
         self.id_number = Application.id_number
         Application.id_number += 1
@@ -44,9 +44,9 @@ class Application:
         # Behavioral assumption of whether an application uses gateways or not
         self.uses_gateway = uses_gateway
 
-        # This is a tag for generic uses, like domain names or malicious/honest tracking
-        self.tag = tag
-
         # This is the probability that an application will use their session, used for session granularity analysis
         assert abs(session_use_prob) <= 1.0, "The session use probability must be between 0 and 1."
         self.session_use_prob=abs(session_use_prob)
+
+        # Numer of servicers to use in a session
+        self.number_servicers = number_servicers
