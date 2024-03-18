@@ -42,7 +42,7 @@ NumberOfBlocksType = NewType("Number of Blocks", int)
 #                                                                                           "average_latency": MillisecondsType,
 #                                                                                           "volume": int
 #                                                                                           }))
-ServicerTestScoresType = NewType('Service Test Scores', TypedDict('Service Test Scores', {"last_sample_height": datetime,
+ServicerTestScoresType = NewType('Service Test Scores', TypedDict('Service Test Scores', {"last_sample_height": int,
                                                                                           "total_samples": int,
                                                                                           "botom_N": List[bool],
                                                                                           "data_accuracy": PercentType,

@@ -32,7 +32,12 @@ def servicer_join_policy(
             name=space["name"],
             servicer_salary=0,
             report_card=None,
-            test_scores=None,
+            test_scores={"last_sample_height": -1,
+                        "total_samples": -1,
+                        "botom_N": None,
+                        "data_accuracy": 1.0,
+                        "average_latency": 0.0,
+                        },
             pokt_holdings=space["personal_holdings"],
             staked_pokt=space["stake_amount"],
             service_url=space["service_url"],
@@ -132,12 +137,16 @@ def servicer_relay_policy(
         bad_relays = split_relays_round_robin(self_deal_nodes)
         # Create ordered list of all nodes used
         ranked_nodes = self_deal_nodes
+        random.shuffle(ranked_nodes)
+        random.shuffle(ignored_nodes)
         if len(ignored_nodes) > 0:
             ranked_nodes += ignored_nodes
+        
     else:
         # Create a list of ranked nodes, this is round robin, so lets make it random
         ranked_nodes = [i for i in range(len(session["servicers"]))]
         # Round robin all relays
+        random.shuffle(ranked_nodes)
         bad_relays = split_relays_round_robin(ranked_nodes)
 
     # Add the ranked list of nodes to the relay data

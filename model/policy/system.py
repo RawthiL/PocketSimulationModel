@@ -14,7 +14,8 @@ from ..spaces import (
 )
 from typing import Tuple, List
 from math import isclose
-
+import numpy as np
+from copy import deepcopy
 
 def fee_reward_policy(
     state: StateType, params: ParamType, domain: Tuple[distribute_fees_space]
@@ -105,6 +106,7 @@ def assign_servicer_salary_policy(
     # Get actual servicers used in the session
     servicers = space["servicers"]
 
+    # Check that they are actually active and on this geozone
     geo_servicers = [
         x for x in servicers if x.geo_zone == space["geo_zone"] and not x.pause_height
     ]
@@ -115,13 +117,59 @@ def assign_servicer_salary_policy(
         servicers = [x for x in state["Servicers"] if not x.pause_height]
     out = []
 
+    assert len(servicers) == params['maximum_servicers_per_session']
+
     # Stake buckets
     # Each servicer's stake is mapped to one of 4 buckets of 15K increments that denotes their reward share
     stake_bins = [max(1, min(x.staked_pokt // 15000000000, 4)) for x in servicers]
 
+    # Update QoS
+    if params['implicit_QoS']:
+        # The implicit QoS will look at the ordering of nodes and keep track of
+        # the last `implicit_QoS_memory` number sessions, and if the node is 
+        # within the lowes `implicit_QoS_low_k` number of nodes in the list at 
+        # least `implicit_QoS_max_low` number of times, it will jail it and mint
+        # no tokens to it
+        remove_list = list()
+
+        assert len(servicers) == len(np.unique(servicers))
+        # Get the las N nodes
+        for idx, svs in enumerate(servicers[::-1]):
+
+            # Check if first session
+            if svs.test_scores['last_sample_height'] == -1:
+                # Initialize
+                svs.test_scores['total_samples'] = -1
+                svs.test_scores['botom_N'] = deepcopy([False for _ in range(params['implicit_QoS_memory'])])
+
+            svs.test_scores['last_sample_height'] = state["height"]
+            
+            # Update the rolling index
+            svs.test_scores['total_samples'] += 1
+            if svs.test_scores['total_samples'] >= params['implicit_QoS_memory']:
+                svs.test_scores['total_samples'] = 0
+            
+            # The first 3 will result in a penalization
+            if idx <= params['implicit_QoS_low_k']:
+                # Add to the record that his node was bad, bad node bad bad
+                svs.test_scores['botom_N'][svs.test_scores['total_samples']] = True
+            else:
+                # This node was a great dude!
+                svs.test_scores['botom_N'][svs.test_scores['total_samples']] = False
+
+            # Check if the node was in the low K at least the expected number of times
+            if np.sum(svs.test_scores['botom_N']) >= params['implicit_QoS_max_low']:
+                # Punish this one
+                remove_list.append(svs.name)
+                # TODO : Actually jail and slash them
+                    
+
     # Split the reward evenly among all servicers
     payment_per = space["reward"] // sum(stake_bins)
     for servicer, sb in zip(servicers, stake_bins):
+        # If not already in the list, add it (this list is updated from all sessions)
+        # Then, assign rewards to tracker
+        # This tracks potential earnings, not actual earnings.
         if servicer not in servicer_earnings:
             servicer_earnings[servicer] = {}
         if service not in servicer_earnings[servicer]:
@@ -129,12 +177,20 @@ def assign_servicer_salary_policy(
         else:
             servicer_earnings[servicer][service] += int(payment_per * sb)
 
+        QoS_modifier = servicer.QoS
+        if params['implicit_QoS']:
+            # Apply penalty (if needed) by modifying the QoS modulator
+            if servicer.name in remove_list:
+                QoS_modifier = 0
+
+        # Modify this servicer pokt amount
         space1: modify_servicer_pokt_space = {
-            "amount": payment_per * servicer.QoS,
+            "amount": payment_per * QoS_modifier,
             "public_key": servicer,
         }
+        # Burn all POKT not minted to this one
         space2: burn_pokt_mechanism_space = {
-            "burn_amount": payment_per * (1 - servicer.QoS)
+            "burn_amount": payment_per * (1 - QoS_modifier)
         }
         out.append((space1, space2))
     return out

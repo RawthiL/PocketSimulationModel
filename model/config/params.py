@@ -109,6 +109,10 @@ system_param_config: Dict[str, SystemParamsType] = {
         # "supported_services": [None],
         "oracle_treatment_time_mean": [10],
         "kpi_3_R": [1.632 * 10**-5],
+        "implicit_QoS": [False],
+        "implicit_QoS_memory": [0],
+        "implicit_QoS_low_k" : [0],
+        "implicit_QoS_max_low" : [0],
     },
     "Base": {
         "granularity" : ["day"],
@@ -145,6 +149,10 @@ system_param_config: Dict[str, SystemParamsType] = {
         "maturity_relay_cost": [0.000001971 * 0.75],
         "oracle_treatment_time_mean": [10],
         "kpi_3_R": [1.632 * 10**-5],
+        "implicit_QoS": [False],
+        "implicit_QoS_memory": [0],
+        "implicit_QoS_low_k" : [0],
+        "implicit_QoS_max_low" : [0],
     },
 }
 
@@ -157,6 +165,11 @@ system_param_config["ImplicitQoS"] = deepcopy(system_param_config["Test"])
 system_param_config["ImplicitQoS"]["granularity"] = ["session"]
 system_param_config["ImplicitQoS"]["minimum_servicers_per_session"] = [24]
 system_param_config["ImplicitQoS"]["maximum_servicers_per_session"] = [24]
+system_param_config["ImplicitQoS"]["implicit_QoS"] = [True]
+system_param_config["ImplicitQoS"]["implicit_QoS_memory"] = [4]
+system_param_config["ImplicitQoS"]["implicit_QoS_low_k"] = [3]
+system_param_config["ImplicitQoS"]["implicit_QoS_max_low"] = [3]
+
 
 
 

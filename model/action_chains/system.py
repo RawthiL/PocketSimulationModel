@@ -41,7 +41,8 @@ def update_revenue_expectations(state, params, servicer_earnings):
 
 
 def block_reward_ac(state, params):
-    servicer_earnings = {}
+    # Keep track of servicer earnings
+    servicer_earnings = {} 
     # Create one space per (service , geozone) tuple, with the total number of relays processed there
     spaces = block_reward_ba(state, params)
     # Loop all spaces, all (service , geozone) pairs
