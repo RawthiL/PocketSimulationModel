@@ -35,12 +35,18 @@ NanoSecondsType = NewType("Nanoseconds", int)
 # Number of blocks
 NumberOfBlocksType = NewType("Number of Blocks", int)
 
-ServicerTestScoresType = NewType('Service Test Scores', TypedDict('Service Test Scores', {"sampling_start": datetime,
+# ServicerTestScoresType = NewType('Service Test Scores', TypedDict('Service Test Scores', {"sampling_start": datetime,
+#                                                                                           "total_samples": int,
+#                                                                                           "null_indices": List[int],
+#                                                                                           "data_accuracy": PercentType,
+#                                                                                           "average_latency": MillisecondsType,
+#                                                                                           "volume": int
+#                                                                                           }))
+ServicerTestScoresType = NewType('Service Test Scores', TypedDict('Service Test Scores', {"last_sample_height": datetime,
                                                                                           "total_samples": int,
-                                                                                          "null_indices": List[int],
+                                                                                          "botom_N": List[bool],
                                                                                           "data_accuracy": PercentType,
                                                                                           "average_latency": MillisecondsType,
-                                                                                          "volume": int
                                                                                           }))
 
 # Simple representation of a floating point number between 0-1

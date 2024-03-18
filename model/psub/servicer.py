@@ -18,18 +18,28 @@ def p_servicers_join(_params, substep, state_history, state) -> dict:
 
 
 def p_relay_requests(_params, substep, state_history, state) -> dict:
+    # Calculate the number of sessions that we will be simulating
     number_relays = _params["average_session_per_application"] * len(
         state["Applications"]
     ) # for session granularity we use average_session_per_application=1 to loop over all apps
+    
+    # Keep track of total relays
     total_relays = 0
     processed_relays = 0
+    # The relay log will contain how many relays were done and the list of servicers
     relay_log = {}
+    # The servicer relays logs
     servicer_relay_log = {}
     for i in range(number_relays):
         out = relay_requests_ac(state, _params, relay_log, servicer_relay_log, i)
         total_relays += out["total_relays"]
         processed_relays += out["processed_relays"]
-    assert sum(relay_log.values()) == processed_relays
+
+    # Assert that all relays were correctly assigned
+    relay_log_sum = 0
+    for relay, _ in relay_log.values():
+        relay_log_sum += relay
+    assert relay_log_sum == processed_relays
     assert sum(servicer_relay_log.values()) == processed_relays
     return {
         "total_relays": total_relays,

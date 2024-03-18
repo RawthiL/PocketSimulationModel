@@ -31,7 +31,6 @@ class Servicer:
         stake_status: StakeStatusType,
         unstaking_height: BlockHeightType,
         QoS: float,
-        tag: str = "default",
     ):
         self.id_number = Servicer.id_number
         Servicer.id_number += 1

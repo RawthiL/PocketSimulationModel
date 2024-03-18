@@ -18,7 +18,7 @@ from ..spaces import (
 from typing import Tuple, Union, List
 from ..classes import Servicer
 import random
-
+import numpy as np
 
 def servicer_join_policy(
     state: StateType, params: ParamType, domain: Tuple[servicer_join_space]
@@ -65,11 +65,14 @@ def servicer_relay_policy(
     n_relays = session["number_of_relays"]
     geo_zone = session["application"].geo_zone
     service = session["service"]
-    key = (service, geo_zone)
+    app_name = session["application"].name
+    # Keep track of relays done and session servicers
+    # The servicers are filled in order of amount of processed relays at the end
+    key = (service, geo_zone, app_name)
     if key in relay_log:
-        relay_log[key] += n_relays
+        relay_log[key][0] += n_relays
     else:
-        relay_log[key] = n_relays
+        relay_log[key] = [n_relays, None]
 
     # Payment from the requestor
     if application.delegate:
@@ -104,7 +107,7 @@ def servicer_relay_policy(
                 assigned_modulo = True
             s = session["servicers"][i]
             if s.shut_down:
-                relay_log[(service, geo_zone)] -= amt
+                relay_log[(service, geo_zone, app_name)][0] -= amt
                 bad_relays += amt
             else:
                 if s in servicer_relay_log:
@@ -115,20 +118,31 @@ def servicer_relay_policy(
 
     # Check if the app is malicious and self deal if so
     self_deal_nodes = list()
+    ignored_nodes = list()
     if "malicious" in application.name:
         # Now chek if there are any malicous nodes to deal to
         for idx in range(len(session["servicers"])):
             if "malicious" in session["servicers"][idx].name :
                 # print(session["servicers"][idx].name)
                 self_deal_nodes.append(idx)
+            else:
+                ignored_nodes.append(idx)
     if len(self_deal_nodes)>0:
-        # print(self_deal_nodes)
         # Assign all relays to own nodes
         bad_relays = split_relays_round_robin(self_deal_nodes)
+        # Create ordered list of all nodes used
+        ranked_nodes = self_deal_nodes
+        if len(ignored_nodes) > 0:
+            ranked_nodes += ignored_nodes
     else:
+        # Create a list of ranked nodes, this is round robin, so lets make it random
+        ranked_nodes = [i for i in range(len(session["servicers"]))]
         # Round robin all relays
-        bad_relays = split_relays_round_robin([i for i in range(len(session["servicers"]))])
+        bad_relays = split_relays_round_robin(ranked_nodes)
 
+    # Add the ranked list of nodes to the relay data
+    relay_log[key][1] = [session["servicers"][i] for i in ranked_nodes]
+        
     # Burn per relay policy
     space2: servicer_relay_space = domain[0]
 

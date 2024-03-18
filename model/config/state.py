@@ -311,7 +311,7 @@ for i in range(GAMING_NODES_TOTAL//2):
             unstaking_height=None,
             QoS=1.0, # All start as honest
         ),)
-# Add malicious apps
+# Add malicious servicers
 for i in range(GAMING_NODES_TOTAL//2):
     servicers_config['Game50-50'].append(
         Servicer(

@@ -41,25 +41,38 @@ def block_reward_policy_aggregate(
     validator_block_reward_space,
     dao_block_reward_space,
 ]:
+    '''
+    This function takes the data from the block rewards and calculates the total 
+    amount of POKT minted per geozone and servicer for all actors:
+    - Servicer
+    - Validators
+    - DAO
+    '''
     space = domain[0]
 
-    reward = int(space["relays"] * state["relays_to_tokens_multiplier"])
+    # Calculate the total reward as the total number of relays times the RTTM
+    # TODO : Add service weight here
+    reward = int(space["relays"][0] * state["relays_to_tokens_multiplier"])
 
+    # Calculate the servicer allocation as the total minus the validators and DAO shares
     servicer_allocation = (
         1 - params["block_proposer_allocation"] - params["dao_allocation"]
     )
-
+    # Create servicers salary space
     space1: assign_servicer_salary_space = {
         "geo_zone": space["geo_zone"],
         "reward": reward * servicer_allocation,
         "service": space["service"],
+        "servicers": space["relays"][1],
     }
-
+    # Create space to keep track of POKT mining
     space2: mint_pokt_mechanism_space = {"mint_amount": reward}
+    # Create validators block reward space
     space3: validator_block_reward_space = {
         "public_key": space["block_producer"],
         "reward_amount": reward * params["block_proposer_allocation"],
     }
+    # Create DAO rewards
     space4: dao_block_reward_space = {
         "reward_amount": reward * params["dao_allocation"]
     }
@@ -77,9 +90,21 @@ def assign_servicer_salary_policy(
     domain: Tuple[assign_servicer_salary_space],
     servicer_earnings,
 ) -> List[Tuple[modify_servicer_pokt_space, burn_pokt_mechanism_space]]:
+    '''
+    Mint the salary to each servicer on the list of servicers. The input space contains:
+    - reward : Total POKT to be distributed
+    - servicers : List of servicers
+    - geo_zone : Used to track income origin
+    - service : Used to track income origin
+    '''
+    # Get the space data 
     space = domain[0]
+    # Get the service being used
     service = space["service"]
-    servicers = service.servicers
+    # servicers = service.servicers
+    # Get actual servicers used in the session
+    servicers = space["servicers"]
+
     geo_servicers = [
         x for x in servicers if x.geo_zone == space["geo_zone"] and not x.pause_height
     ]
@@ -94,6 +119,7 @@ def assign_servicer_salary_policy(
     # Each servicer's stake is mapped to one of 4 buckets of 15K increments that denotes their reward share
     stake_bins = [max(1, min(x.staked_pokt // 15000000000, 4)) for x in servicers]
 
+    # Split the reward evenly among all servicers
     payment_per = space["reward"] // sum(stake_bins)
     for servicer, sb in zip(servicers, stake_bins):
         if servicer not in servicer_earnings:
