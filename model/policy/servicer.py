@@ -63,10 +63,35 @@ def servicer_relay_policy(
     servicer_relay_space,
     Union[servicer_relay_space, None],
 ]:
+    session = domain[0]["session"]
+
+    # Get application
     application = domain[0]["applications"]
 
-    # Log relays
-    session = domain[0]["session"]
+    # Check if the app is adversary and self deal if so
+    self_deal_nodes = list()
+    ignored_nodes = list()
+    do_attack = False
+    malicious_behavior = "adversary" in application.name
+    if malicious_behavior:
+        # Now chek if there are any malicous nodes to deal to
+        for idx in range(len(session["servicers"])):
+            if "adversary" in session["servicers"][idx].name :
+                # print(session["servicers"][idx].name)
+                self_deal_nodes.append(idx)
+                do_attack = True
+            else:
+                ignored_nodes.append(idx)
+    # Implement attack
+    if malicious_behavior:
+        if do_attack:
+            # Perform x relays
+            session["number_of_relays"] *= 1 #len(self_deal_nodes)
+        else:
+            # Do nothing
+            session["number_of_relays"] = 0
+
+    # Log relays 
     n_relays = session["number_of_relays"]
     geo_zone = session["application"].geo_zone
     service = session["service"]
@@ -82,7 +107,7 @@ def servicer_relay_policy(
     # Payment from the requestor
     if application.delegate:
         relay_charge = (
-            domain[0]["session"]["number_of_relays"] * state["gateway_fee_per_relay"]
+            n_relays * state["gateway_fee_per_relay"]
         )
         space1: modify_gateway_pokt_space = {
             "public_key": application.delegate,
@@ -90,8 +115,7 @@ def servicer_relay_policy(
         }
     else:
         relay_charge = (
-            domain[0]["session"]["number_of_relays"]
-            * state["application_fee_per_relay"]
+            n_relays * state["application_fee_per_relay"]
         )
         space1: modify_application_pokt_space = {
             "public_key": application,
@@ -121,17 +145,7 @@ def servicer_relay_policy(
                     servicer_relay_log[s] = amt
         return bad_relays
 
-    # Check if the app is malicious and self deal if so
-    self_deal_nodes = list()
-    ignored_nodes = list()
-    if "malicious" in application.name:
-        # Now chek if there are any malicous nodes to deal to
-        for idx in range(len(session["servicers"])):
-            if "malicious" in session["servicers"][idx].name :
-                # print(session["servicers"][idx].name)
-                self_deal_nodes.append(idx)
-            else:
-                ignored_nodes.append(idx)
+    
     if len(self_deal_nodes)>0:
         # Assign all relays to own nodes
         bad_relays = split_relays_round_robin(self_deal_nodes)

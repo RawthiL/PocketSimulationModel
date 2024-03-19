@@ -51,7 +51,6 @@ def relay_requests_ac(state, params, relay_log, servicer_relay_log, idx):
     # Submit request
     spaces = submit_relay_requests_ba(state, params, idx)
     spaces = submit_relay_requests_policy(state, params, spaces)
-    out["total_relays"] = spaces[0]["session"]["number_of_relays"]
 
     if spaces[0]["session"]["number_of_relays"] == 0:
         out["processed_relays"] = 0
@@ -71,6 +70,7 @@ def relay_requests_ac(state, params, relay_log, servicer_relay_log, idx):
     # Relay the request
     spaces = relay_requests_ba(state, params)
     spaces = servicer_relay_policy(state, params, spaces, relay_log, servicer_relay_log)
+    out["total_relays"] = spaces[1]["session"]["number_of_relays"] # Could have been modified by the relay policy for adversary relays
     out["processed_relays"] = spaces[-1]["session"]["number_of_relays"]
     if type(spaces[0]["public_key"]) == Gateway:
         # Track the fees paid

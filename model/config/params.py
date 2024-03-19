@@ -310,6 +310,8 @@ functional_param_config: Dict[str, FunctionalParamsType] = {
 
 functional_param_config["ImplicitQoS"] = deepcopy(functional_param_config["Test"])
 functional_param_config["ImplicitQoS"]["submit_relay_requests_function"] = ["app_looper_test"]
+functional_param_config["ImplicitQoS"]["app_looper_test_fixed_relays"] = [100]
+
 
 
 config_option_map_sweep = {}

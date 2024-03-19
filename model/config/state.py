@@ -6,7 +6,7 @@ from model.mechanisms import link_service_mechanism
 from itertools import product
 import random
 
-# This is the number of total apps to be used in gaming tests (honest+malicious)
+# This is the number of total apps to be used in gaming tests (honest+adversary)
 GAMING_APPS_TOTAL = 10
 # Same but for nodes
 GAMING_NODES_TOTAL = 100
@@ -183,7 +183,7 @@ for i in range(GAMING_APPS_TOTAL//2):
             delegate=None,
             uses_gateway=True,
         ),)
-# Add malicious apps
+# Add adversary apps
 for i in range(GAMING_APPS_TOTAL//2):
     application_config['Game50-50'].append(Application(
             name="malicious_%d"%i,
@@ -316,7 +316,7 @@ for i in range(GAMING_NODES_TOTAL//2):
             unstaking_height=None,
             QoS=1.0, # All start as honest
         ),)
-# Add malicious servicers
+# Add adversary servicers
 for i in range(GAMING_NODES_TOTAL//2):
     servicers_config['Game50-50'].append(
         Servicer(
